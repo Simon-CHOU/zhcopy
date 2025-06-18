@@ -30,7 +30,7 @@
 
 ### 安装步骤
 1. 安装浏览器扩展管理器（如 Tampermonkey、Greasemonkey）
-2. 点击安装本脚本
+2. 从 GreasyFork 安装本脚本：[知乎回答复制助手](https://greasyfork.org/zh-CN/scripts/539913-%E7%9F%A5%E4%B9%8E%E5%9B%9E%E7%AD%94%E5%A4%8D%E5%88%B6%E5%8A%A9%E6%89%8B)
 3. 访问知乎网站，脚本将自动生效
 
 ### 操作指南
@@ -98,8 +98,8 @@ https://www.zhihu.com/people/zhangsan
 ## 📞 反馈与支持
 
 如果您在使用过程中遇到问题或有改进建议，欢迎通过以下方式联系：
-- GitHub Issues：提交bug报告或功能请求
-- GreasyFork评论：分享使用体验和建议
+- [GitHub Issues](https://github.com/Simon-CHOU/zhcopy/issues)：提交bug报告或功能请求 
+- [GreasyFork评论](https://greasyfork.org/zh-CN/scripts/539913-%E7%9F%A5%E4%B9%8E%E5%9B%9E%E7%AD%94%E5%A4%8D%E5%88%B6%E5%8A%A9%E6%89%8B/feedback#post-discussion)：分享使用体验和建议
 
 ---
 
