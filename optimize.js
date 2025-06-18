@@ -1,9 +1,9 @@
 // ==UserScript==
-// @name         知乎回答复制助手优化版
+// @name         知乎回答复制助手
 // @namespace    http://tampermonkey.net/
 // @version      1.0
 // @description  在知乎回答底部添加复制全文按钮，复制包含问题标题、答案链接、答主信息、签名档、正文和发布时间
-// @author       Your name
+// @author       https://github.com/Simon-CHOU/
 // @match        https://www.zhihu.com/*
 // @match        https://www.zhihu.com/question/*
 // @match        https://www.zhihu.com/answer/*
@@ -58,14 +58,23 @@
         let questionTitle = '';
         let questionUrl = '';
         
-        // 方法1：从答案项的标题元素获取
-        const titleElement = contentItem.querySelector('.ContentItem-title a, h2.ContentItem-title a');
-        if (titleElement) {
-            questionTitle = titleElement.textContent.trim();
-            questionUrl = titleElement.href;
+        // 方法1：从问题页面的标题元素获取 (针对 /question/ 页面)
+        const questionHeaderTitle = document.querySelector('h1.QuestionHeader-title');
+        if (questionHeaderTitle) {
+            questionTitle = questionHeaderTitle.textContent.trim();
+            console.log('从 h1.QuestionHeader-title 获取问题标题:', questionTitle);
         }
         
-        // 方法2：从meta标签获取
+        // 方法2：从答案项的标题元素获取
+        if (!questionTitle) {
+            const titleElement = contentItem.querySelector('.ContentItem-title a, h2.ContentItem-title a');
+            if (titleElement) {
+                questionTitle = titleElement.textContent.trim();
+                questionUrl = titleElement.href;
+            }
+        }
+        
+        // 方法3：从meta标签获取
         if (!questionTitle) {
             const metaName = contentItem.querySelector('meta[itemprop="name"]');
             const metaUrl = contentItem.querySelector('meta[itemprop="url"]');
@@ -77,7 +86,7 @@
             }
         }
         
-        // 方法3：从页面标题获取
+        // 方法4：从页面标题获取
         if (!questionTitle) {
             const pageTitle = document.title;
             if (pageTitle && pageTitle.includes(' - 知乎')) {
@@ -85,7 +94,7 @@
             }
         }
         
-        // 方法4：从当前URL推断
+        // 方法5：从当前URL推断
         if (!questionUrl) {
             const currentUrl = window.location.href;
             const questionMatch = currentUrl.match(/\/question\/(\d+)/);
