@@ -371,128 +371,72 @@
 
                 // 组合内容
                 console.log('12. 正在组合最终内容...');
-                let combinedContent = '';
-                
-                // 添加问题标题和答案链接（第一行）
+                let plainText = '';
                 if (questionInfo.title && authorInfo.name) {
-                    const titleLine = questionInfo.title + ` - ${authorInfo.name}的回答 - 知乎`;
-                    combinedContent += titleLine + '<br>';
-                    console.log('添加标题行:', titleLine);
-                } else {
-                    console.log('跳过标题行（标题或答主姓名为空）');
+                    plainText += questionInfo.title + ` - ${authorInfo.name}的回答 - 知乎\n`;
                 }
-                
-                // 添加答案链接
                 if (answerUrl) {
-                    combinedContent += answerUrl + '<br>';
-                    console.log('添加答案链接:', answerUrl);
-                } else {
-                    console.log('跳过答案链接（链接为空）');
+                    plainText += answerUrl + '\n';
                 }
-                
-                // 添加答主链接
                 if (authorInfo.url) {
-                    combinedContent += authorInfo.url + '<br>';
-                    console.log('添加答主链接:', authorInfo.url);
-                } else {
-                    console.log('跳过答主链接（链接为空）');
+                    plainText += authorInfo.url + '\n';
                 }
-                
-                // 添加签名档
                 if (authorInfo.signature) {
-                    const signatureLine = '#签名档 ' + authorInfo.signature;
-                    combinedContent += signatureLine + '<br>';
-                    console.log('添加签名档:', signatureLine);
-                } else {
-                    console.log('跳过签名档（签名为空）');
+                    plainText += '#签名档 ' + authorInfo.signature + '\n';
                 }
-                
-                // 添加正文内容
-                const contentLength = tempDiv.innerHTML.length;
-                combinedContent += tempDiv.innerHTML;
-                console.log('添加正文内容，长度:', contentLength);
-                                
-                // 添加发布时间
+
+                const tempDivForText = document.createElement('div');
+                tempDivForText.innerHTML = tempDiv.innerHTML;
+
+                // 保留段落格式，将<p>标签转换为单个换行
+                let bodyText = '';
+                const paragraphs = tempDivForText.querySelectorAll('p');
+                if (paragraphs.length > 0) {
+                    paragraphs.forEach((p, idx) => {
+                        let txt = p.innerText.trimEnd();
+                        // 最后一个段落后不加多余换行
+                        if (idx < paragraphs.length - 1) {
+                            bodyText += txt + '\n';
+                        } else {
+                            bodyText += txt;
+                        }
+                    });
+                } else {
+                    bodyText = tempDivForText.innerText.trimEnd();
+                }
+                // 签名档和正文之间不加多余空行
+                plainText += bodyText;
+
                 if (publishDate) {
-                    const timeLine = `<br>发布时间：${publishDate}`;
-                    combinedContent += timeLine;
-                    console.log('添加发布时间:', timeLine);
-                } else {
-                    console.log('跳过发布时间（时间为空）');
+                    plainText += `\n发布时间：${publishDate}`;
                 }
-                
-                console.log('✅ 内容组合完成，总长度:', combinedContent.length);
-                console.log('最终内容预览（前200字符）:', combinedContent.substring(0, 200) + '...');
+
+                console.log('✅ 纯文本内容组合完成，总长度:', plainText.length);
+                console.log('最终纯文本内容预览（前200字符）:', plainText.substring(0, 200) + '...');
 
                 // 复制到剪贴板
                 console.log('13. 正在复制到剪贴板...');
                 try {
-                    console.log('尝试使用 GM_setClipboard 方法...');
-                    GM_setClipboard(combinedContent, 'text/html');
-                    console.log('✅ 使用 GM_setClipboard 复制成功');
-                } catch (error) {
-                    console.error('❌ GM_setClipboard 失败:', error);
+                    console.log('尝试使用 navigator.clipboard.writeText 方法...');
+                    await navigator.clipboard.writeText(plainText);
+                    console.log('✅ 使用 navigator.clipboard.writeText 复制成功');
+                } catch (err) {
+                    console.error('❌ navigator.clipboard.writeText 失败:', err);
+                    console.log('尝试使用 textarea 回退方法...');
+                    const textarea = document.createElement('textarea');
+                    textarea.style.position = 'fixed';
+                    textarea.style.top = '-9999px';
+                    textarea.value = plainText;
+                    document.body.appendChild(textarea);
+                    textarea.select();
                     try {
-                        console.log('尝试使用 navigator.clipboard 方法...');
-                        let plainText = '';
-                        // 构造与 combinedContent 顺序一致的纯文本
-                        if (questionInfo.title && authorInfo.name) {
-                            plainText += questionInfo.title + ` - ${authorInfo.name}的回答 - 知乎\n`;
-                        }
-                        if (answerUrl) {
-                            plainText += answerUrl + '\n';
-                        }
-                        if (authorInfo.url) {
-                            plainText += authorInfo.url + '\n';
-                        }
-                        if (authorInfo.signature) {
-                            plainText += '#签名档 ' + authorInfo.signature + '\n';
-                        }
-                        // 处理正文内容，确保段落间有明确的换行
-                        const paragraphs = tempDiv.querySelectorAll('p');
-                        if (paragraphs.length > 0) {
-                            // 如果有段落标签，逐个处理每个段落
-                            const paragraphTexts = Array.from(paragraphs).map(p => p.innerText.trim()).filter(text => text.length > 0);
-                            plainText += paragraphTexts.join('\n');
-                        } else {
-                            // 如果没有段落标签，使用原来的方法
-                            plainText += tempDiv.innerText;
-                        }
-                        if (publishDate) {
-                            plainText += `\n发布时间：${publishDate}`;
-                        }
-                        
-                        console.log('准备的纯文本内容长度:', plainText.length);
-                        console.log('纯文本内容预览（前200字符）:', plainText.substring(0, 200) + '...');
-                        
-                        const clipboardItem = new ClipboardItem({
-                            'text/html': new Blob([combinedContent], { type: 'text/html' }),
-                            'text/plain': new Blob([plainText.trim()], { type: 'text/plain' }) // 使用 trim() 移除末尾可能的多余换行
-                        });
-                        await navigator.clipboard.write([clipboardItem]);
-                        console.log('✅ 使用 navigator.clipboard 复制成功');
-                    } catch (err) {
-                        console.error('❌ navigator.clipboard 失败:', err);
-                        try {
-                            console.log('尝试使用 execCommand 方法...');
-                            const textarea = document.createElement('textarea');
-                            textarea.innerHTML = combinedContent;
-                            document.body.appendChild(textarea);
-                            textarea.select();
-                            const success = document.execCommand('copy');
-                            document.body.removeChild(textarea);
-                            if (success) {
-                                console.log('✅ 使用 execCommand 复制成功');
-                            } else {
-                                const finalError = new Error('所有复制方法都失败了：GM_setClipboard、navigator.clipboard 和 execCommand 均不可用');
-                                console.error('❌ 最终错误:', finalError.message);
-                                throw finalError;
-                            }
-                        } catch (execError) {
-                            console.error('❌ execCommand 也失败了:', execError);
-                            throw execError;
-                        }
+                        document.execCommand('copy');
+                        console.log('✅ 使用 textarea 回退方法复制成功');
+                    } catch (e) {
+                        console.error('❌ 使用 textarea 回退方法复制失败:', e);
+                        alert('复制失败，请手动复制');
                     }
+                    document.body.removeChild(textarea);
                 }
 
                 // 更新按钮状态
