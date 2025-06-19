@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         知乎回答复制助手
 // @namespace    http://tampermonkey.net/
-// @version      1.0
+// @version      1.1
 // @description  在知乎回答底部添加复制全文按钮，复制包含问题标题、答案链接、答主信息、签名档、正文和发布时间
 // @author       https://github.com/Simon-CHOU/
 // @license      GPL-3.0
